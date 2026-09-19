@@ -86,11 +86,12 @@ func convertIngressesToHajimariApps(ingresses []v1.Ingress, rsg util.ReplicaStat
 		if i, ok := appMap[wrapper.GetGroup()]; ok {
 			if wrapper.GetStatusCheckEnabled() && (replicaStatus.GetReplicas() != 0) {
 				appGroups[i].Apps = append(appGroups[i].Apps, models.App{
-					Name:        wrapper.GetName(),
-					Icon:        wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
-					URL:         wrapper.GetURL(),
-					Info:        wrapper.GetInfo(),
-					TargetBlank: wrapper.GetTargetBlank(),
+					Name:          wrapper.GetName(),
+					Icon:          wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
+					URL:           wrapper.GetURL(),
+					Info:          wrapper.GetInfo(),
+					TargetBlank:   wrapper.GetTargetBlank(),
+					VisibleGroups: wrapper.GetVisibleGroups(),
 					Replicas: models.ReplicaInfo{
 						Total:     replicaStatus.GetReplicas(),
 						Available: replicaStatus.GetAvailableReplicas(),
@@ -99,11 +100,12 @@ func convertIngressesToHajimariApps(ingresses []v1.Ingress, rsg util.ReplicaStat
 				})
 			} else {
 				appGroups[i].Apps = append(appGroups[i].Apps, models.App{
-					Name:        wrapper.GetName(),
-					Icon:        wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
-					URL:         wrapper.GetURL(),
-					TargetBlank: wrapper.GetTargetBlank(),
-					Info:        wrapper.GetInfo(),
+					Name:          wrapper.GetName(),
+					Icon:          wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
+					URL:           wrapper.GetURL(),
+					TargetBlank:   wrapper.GetTargetBlank(),
+					Info:          wrapper.GetInfo(),
+					VisibleGroups: wrapper.GetVisibleGroups(),
 				})
 			}
 		}

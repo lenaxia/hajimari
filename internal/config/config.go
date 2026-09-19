@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/toboshii/hajimari/internal/models"
+	"github.com/toboshii/hajimari/internal/visibility"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,6 +14,7 @@ type Config struct {
 	NamespaceSelector     NamespaceSelector       `json:"namespaceSelector"`
 	DefaultEnable         bool                    `json:"defaultEnable"`
 	InstanceName          string                  `json:"instanceName"`
+	GroupsHeader          string                  `json:"groupsHeader"`
 	Title                 string                  `json:"title"`
 	Name                  string                  `json:"name"`
 	LightTheme            string                  `json:"lightTheme"`
@@ -61,6 +63,7 @@ type ExperimentalFeature struct {
 
 func SetDefaults() {
 	viper.SetDefault("DefaultEnable", false)
+	viper.SetDefault("GroupsHeader", visibility.DefaultGroupsHeader)
 	viper.SetDefault("Title", "Hajimari")
 	viper.SetDefault("Name", "You")
 	viper.SetDefault("LightTheme", "gazette")

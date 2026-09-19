@@ -9,6 +9,7 @@ import (
 	"github.com/toboshii/hajimari/internal/hajimari/customapps"
 	"github.com/toboshii/hajimari/internal/models"
 	"github.com/toboshii/hajimari/internal/services"
+	"github.com/toboshii/hajimari/internal/visibility"
 )
 
 type appResource struct {
@@ -66,6 +67,9 @@ func (rs *appResource) ListApps(w http.ResponseWriter, r *http.Request) {
 	}
 
 	apps = append(kubeApps, customApps...)
+
+	user := visibility.NewUserFromRequest(appConfig.GroupsHeader, r)
+	apps = visibility.FilterAppGroups(user, apps)
 
 	if err := render.RenderList(w, r, NewAppListResponse(apps)); err != nil {
 		render.Render(w, r, ErrServerError(err))

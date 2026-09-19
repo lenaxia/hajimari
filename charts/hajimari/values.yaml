@@ -29,6 +29,10 @@ hajimari:
   # -- Set to true to show all discovered applications by default.
   defaultEnable: false
 
+  # -- HTTP header carrying the authenticated user's group memberships
+  # (comma separated), injected by a forward-auth proxy (e.g. Authelia).
+  groupsHeader: Remote-Groups
+
   # -- Namespace selector to use for discovering applications
   namespaceSelector:
     matchNames:
@@ -48,6 +52,7 @@ hajimari:
   #       url: 'https://example.com'
   #       icon: 'mdi:test-tube'
   #       info: This is a test app
+  #       visibleGroups: [family, friends]
 
   # -- Create sample Custom Resource Application
   createCRAppSample: false
@@ -62,6 +67,11 @@ hajimari:
   #     url: 'http://gmail.com'
   #   - name: Slack
   #     url: 'https://slack.com/signin'
+  # - group: Admin Links
+  #   visibleGroups: [admins]
+  #   bookmarks:
+  #   - name: Proxmox
+  #     url: 'https://proxmox.example.com'
 
 
 # -- Configures service settings for the chart.
