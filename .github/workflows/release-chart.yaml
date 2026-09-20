@@ -1,6 +1,7 @@
 name: release chart
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -24,7 +25,12 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.6.3
+          version: v3.13.2
+
+      - name: Add chart dependency repos
+        run: |
+          helm repo add bjw-s https://bjw-s.github.io/helm-charts/
+          helm repo update
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
