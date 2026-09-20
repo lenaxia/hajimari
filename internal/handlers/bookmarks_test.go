@@ -10,16 +10,21 @@ import (
 	"github.com/toboshii/hajimari/internal/models"
 )
 
-func listBookmarksFor(t *testing.T, headers map[string]string) []string {
+func listBookmarksFor(t *testing.T, headers map[string]string, query string) []string {
 	t.Helper()
 	viper.Reset()
 	viper.Set("GroupsHeader", "Remote-Groups")
+	viper.Set("AdminGroups", []string{"admins"})
 	viper.Set("GlobalBookmarks", []models.BookmarkGroup{
 		{Group: "Communicate", Bookmarks: []models.Bookmark{{Name: "Discord"}}},
 		{Group: "Admin Links", VisibleGroups: []string{"admins"}, Bookmarks: []models.Bookmark{{Name: "Proxmox"}}},
 	})
 
-	req, _ := http.NewRequest(http.MethodGet, "/bookmarks", nil)
+	url := "/bookmarks"
+	if query != "" {
+		url += "?" + query
+	}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
@@ -44,6 +49,23 @@ func listBookmarksFor(t *testing.T, headers map[string]string) []string {
 	return groups
 }
 
+func listBookmarksForStatus(t *testing.T, headers map[string]string, query string) int {
+	t.Helper()
+	viper.Reset()
+	viper.Set("GroupsHeader", "Remote-Groups")
+	viper.Set("AdminGroups", []string{"admins"})
+	viper.Set("GlobalBookmarks", []models.BookmarkGroup{})
+
+	req, _ := http.NewRequest(http.MethodGet, "/bookmarks?"+query, nil)
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	recorder := httptest.NewRecorder()
+	NewBookmarkResource().ListBookmarks(recorder, req)
+	return recorder.Code
+}
+
 func TestListBookmarksFiltersPerRequest(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -56,7 +78,39 @@ func TestListBookmarksFiltersPerRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := listBookmarksFor(t, tt.headers)
+			got := listBookmarksFor(t, tt.headers, "")
+			if len(got) != len(tt.want) {
+				t.Fatalf("groups = %v, want %v", got, tt.want)
+			}
+			for i := range tt.want {
+				if got[i] != tt.want[i] {
+					t.Fatalf("groups = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestListBookmarksAdminImpersonation(t *testing.T) {
+	tests := []struct {
+		name    string
+		headers map[string]string
+		query   string
+		want    []string
+	}{
+		{"admin impersonates family", map[string]string{"Remote-Groups": "admins"}, "group=family", []string{"Communicate"}},
+		{"admin impersonates admins unchanged", map[string]string{"Remote-Groups": "admins"}, "group=admins", []string{"Communicate", "Admin Links"}},
+		{"non admin denied", map[string]string{"Remote-Groups": "family"}, "group=admins", nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.want == nil {
+				if code := listBookmarksForStatus(t, tt.headers, tt.query); code != http.StatusForbidden {
+					t.Fatalf("expected 403, got %d", code)
+				}
+				return
+			}
+			got := listBookmarksFor(t, tt.headers, tt.query)
 			if len(got) != len(tt.want) {
 				t.Fatalf("groups = %v, want %v", got, tt.want)
 			}

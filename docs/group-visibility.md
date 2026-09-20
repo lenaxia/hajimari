@@ -58,7 +58,10 @@ spec:
 | FR5 | Group membership is read from a configurable HTTP header (config key `groupsHeader`, default `Remote-Groups`), comma-separated. |
 | FR6 | Filtering applies uniformly to: discovered ingress apps, custom apps (per app), CRD apps (per app), and bookmark groups (per group). |
 | FR7 | The API response shape is unchanged; `visibleGroups` is never serialized to clients (no metadata leak). |
-| FR8 | No frontend changes required. |
+| FR8 | No frontend changes required for basic filtering. |
+| FR9 | Members of a configured admin group (config `adminGroups`, default `admins`) may pass `?group=<groups>` on the page or API to preview the dashboard exactly as that membership would see it. |
+| FR10 | Impersonation accepts a comma separated list or repeated params (union view); an empty value (`?group=`) previews the groupless (unauthenticated-equivalent) view. |
+| FR11 | Non-admins passing `?group=` receive `403 Forbidden`; the parameter never grants visibility on its own. |
 
 ### Non-functional
 
@@ -82,6 +85,10 @@ spec:
   header and must be deployed so the header can only be set by the proxy
   (network policy: the Service is reachable only via the forward-auth chain).
 - **INV5 (normalization):** comparisons are over trimmed, lowercased names.
+- **INV6 (impersonation boundary):** the admin check is evaluated exclusively
+  against the trusted header groups; query parameters never influence the
+  requester's own privileges. Impersonation replaces the group set (it does
+  not union with the admin's own groups).
 
 ## 4. Acceptance Criteria
 
@@ -99,6 +106,11 @@ spec:
 | AC10 | Two concurrent users (family, admin) alternate requests | Each sees exactly their set on every request (no bleed) |
 | AC11 | Stock deployment (no annotations, no proxy header) | API responses byte-identical in shape to upstream |
 | AC12 | `go build ./...`, `go vet ./...`, `go test ./...` | All pass |
+| AC13 | Header `admins`, `?group=family` | Response identical to a header-only `family` user (apps + bookmarks) |
+| AC14 | Header `admins`, `?group=` | Groupless view: only unannotated items |
+| AC15 | Header `family` or no header, any `?group=` value | 403 Forbidden |
+| AC16 | Header `admins`, no param | Admin's own view unchanged |
+| AC17 | Header `admins`, `?group=family,admins` | Union of both groups' views |
 
 ## 5. Test Plan
 

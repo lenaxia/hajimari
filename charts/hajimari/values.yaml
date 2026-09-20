@@ -33,6 +33,11 @@ hajimari:
   # (comma separated), injected by a forward-auth proxy (e.g. Authelia).
   groupsHeader: Remote-Groups
 
+  # -- Groups whose members may use ?group=<groups> to preview the dashboard
+  # as another membership would see it.
+  adminGroups:
+    - admins
+
   # -- Namespace selector to use for discovering applications
   namespaceSelector:
     matchNames:

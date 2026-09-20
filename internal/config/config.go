@@ -15,6 +15,7 @@ type Config struct {
 	DefaultEnable         bool                    `json:"defaultEnable"`
 	InstanceName          string                  `json:"instanceName"`
 	GroupsHeader          string                  `json:"groupsHeader"`
+	AdminGroups           []string                `json:"adminGroups"`
 	Title                 string                  `json:"title"`
 	Name                  string                  `json:"name"`
 	LightTheme            string                  `json:"lightTheme"`
@@ -64,6 +65,7 @@ type ExperimentalFeature struct {
 func SetDefaults() {
 	viper.SetDefault("DefaultEnable", false)
 	viper.SetDefault("GroupsHeader", visibility.DefaultGroupsHeader)
+	viper.SetDefault("AdminGroups", []string{"admins"})
 	viper.SetDefault("Title", "Hajimari")
 	viper.SetDefault("Name", "You")
 	viper.SetDefault("LightTheme", "gazette")

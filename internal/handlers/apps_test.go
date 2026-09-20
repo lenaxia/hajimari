@@ -32,10 +32,20 @@ func testApps() []models.AppGroup {
 
 func listAppsFor(t *testing.T, headers map[string]string) []map[string]interface{} {
 	t.Helper()
+	return listAppsForQuery(t, headers, "")
+}
+
+func listAppsForQuery(t *testing.T, headers map[string]string, query string) []map[string]interface{} {
+	t.Helper()
 	viper.Reset()
 	viper.Set("GroupsHeader", "Remote-Groups")
+	viper.Set("AdminGroups", []string{"admins"})
 
-	req, _ := http.NewRequest(http.MethodGet, "/apps", nil)
+	url := "/apps"
+	if query != "" {
+		url += "?" + query
+	}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
@@ -52,6 +62,22 @@ func listAppsFor(t *testing.T, headers map[string]string) []map[string]interface
 		t.Fatalf("failed to decode response: %v", err)
 	}
 	return response
+}
+
+func listAppsForQueryStatus(t *testing.T, headers map[string]string, query string) int {
+	t.Helper()
+	viper.Reset()
+	viper.Set("GroupsHeader", "Remote-Groups")
+	viper.Set("AdminGroups", []string{"admins"})
+
+	req, _ := http.NewRequest(http.MethodGet, "/apps?"+query, nil)
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	recorder := httptest.NewRecorder()
+	NewAppResource(&fakeAppService{apps: testApps()}).ListApps(recorder, req)
+	return recorder.Code
 }
 
 func appNames(response []map[string]interface{}) map[string][]string {
@@ -156,5 +182,88 @@ func TestListAppsCustomHeaderName(t *testing.T) {
 	names := appNames(response)
 	if len(names["infra"]) != 1 || names["infra"][0] != "proxmox" {
 		t.Errorf("custom header groups not applied: %v", names)
+	}
+}
+
+func TestListAppsAdminImpersonation(t *testing.T) {
+	adminHeader := map[string]string{"Remote-Groups": "admins"}
+
+	tests := []struct {
+		name    string
+		headers map[string]string
+		query   string
+		want    map[string][]string
+	}{
+		{
+			name:    "admin impersonates family",
+			headers: adminHeader,
+			query:   "group=family",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}},
+		},
+		{
+			name:    "admin impersonates friend sees only unannotated",
+			headers: adminHeader,
+			query:   "group=friends",
+			want:    map[string][]string{"media": {"jellyfin"}},
+		},
+		{
+			name:    "admin impersonates groupless with empty param",
+			headers: adminHeader,
+			query:   "group=",
+			want:    map[string][]string{"media": {"jellyfin"}},
+		},
+		{
+			name:    "admin impersonates comma separated union",
+			headers: adminHeader,
+			query:   "group=family,admins",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}, "infra": {"proxmox"}},
+		},
+		{
+			name:    "admin without param keeps own view",
+			headers: adminHeader,
+			query:   "",
+			want:    map[string][]string{"media": {"jellyfin"}, "infra": {"proxmox"}},
+		},
+		{
+			name:    "case insensitive group value",
+			headers: adminHeader,
+			query:   "group=Family",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := appNames(listAppsForQuery(t, tt.headers, tt.query))
+			if len(got) != len(tt.want) {
+				t.Fatalf("groups = %v, want %v", got, tt.want)
+			}
+			for group, wantApps := range tt.want {
+				if len(got[group]) != len(wantApps) {
+					t.Fatalf("group %q apps = %v, want %v", group, got[group], wantApps)
+				}
+				for i, want := range wantApps {
+					if got[group][i] != want {
+						t.Fatalf("group %q apps = %v, want %v", group, got[group], wantApps)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestListAppsImpersonationDeniedForNonAdmin(t *testing.T) {
+	tests := []struct {
+		name    string
+		headers map[string]string
+	}{
+		{"family user", map[string]string{"Remote-Groups": "family"}},
+		{"groupless user", nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if code := listAppsForQueryStatus(t, tt.headers, "group=family"); code != http.StatusForbidden {
+				t.Errorf("expected 403, got %d", code)
+			}
+		})
 	}
 }

@@ -33,7 +33,11 @@ func (rs *bookmarkResource) ListBookmarks(w http.ResponseWriter, r *http.Request
 
 	globalBookmarks := appConfig.GlobalBookmarks
 
-	user := visibility.NewUserFromRequest(appConfig.GroupsHeader, r)
+	user, status, ok := resolveVisibilityUser(appConfig, r)
+	if !ok {
+		http.Error(w, "group impersonation requires admin group membership", status)
+		return
+	}
 	globalBookmarks = visibility.FilterBookmarkGroups(user, globalBookmarks)
 
 	if err := render.RenderList(w, r, NewBookmarkListResponse(globalBookmarks)); err != nil {

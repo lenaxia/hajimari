@@ -124,8 +124,16 @@ Semantics:
 
 Hajimari trusts the configured header unconditionally: ensure the service is
 only reachable through the forward-auth chain (ingress/network policy), since
-anything that can set the header can impersonate group membership. See
-[docs/group-visibility.md](docs/group-visibility.md) for the full
+anything that can set the header can impersonate group membership.
+
+Members of a group listed in `adminGroups` (default `admins`) can preview
+what another audience sees by appending a `group` query parameter, e.g.
+`https://home.example.com/?group=family`. The value may be a comma separated
+list (union preview) or empty (`?group=`) to preview the groupless view. The
+parameter is only honored for admins — determined solely from the trusted
+header — and everyone else receives a 403.
+
+See [docs/group-visibility.md](docs/group-visibility.md) for the full
 specification, invariants and test plan.
 
 

@@ -68,7 +68,11 @@ func (rs *appResource) ListApps(w http.ResponseWriter, r *http.Request) {
 
 	apps = append(kubeApps, customApps...)
 
-	user := visibility.NewUserFromRequest(appConfig.GroupsHeader, r)
+	user, status, ok := resolveVisibilityUser(appConfig, r)
+	if !ok {
+		http.Error(w, "group impersonation requires admin group membership", status)
+		return
+	}
 	apps = visibility.FilterAppGroups(user, apps)
 
 	if err := render.RenderList(w, r, NewAppListResponse(apps)); err != nil {

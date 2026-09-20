@@ -27,13 +27,16 @@ type Startpage = {
     bookmarks: any;
 };
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: PageLoad = async ({ fetch, params, url }) => {
     const { slug } = params;
+
+    const groupParam = url.searchParams.get('group');
+    const groupSuffix = groupParam !== null ? `?group=${encodeURIComponent(groupParam)}` : '';
 
     const [startpage, apps, bookmarks] = await Promise.all([
         api(fetch, 'GET', `startpage/${slug}`),
-        api(fetch, 'GET', 'apps'),
-        api(fetch, 'GET', 'bookmarks')
+        api(fetch, 'GET', `apps${groupSuffix}`),
+        api(fetch, 'GET', `bookmarks${groupSuffix}`)
     ]);
 
     if (await startpage.status !== 200) {
