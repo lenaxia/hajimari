@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/toboshii/hajimari/frontend"
 )
@@ -29,6 +30,15 @@ func tryRead(fs embed.FS, prefix, requestedPath string, w http.ResponseWriter) e
 	contentType := mime.TypeByExtension(filepath.Ext(requestedPath))
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", contentType)
+	// SvelteKit emits content-hashed URLs under /_app/immutable/ — safe to
+	// cache aggressively. Everything else (index.html, favicon, ...) must be
+	// revalidated so browsers pick up new deployments instead of serving a
+	// heuristically cached stale shell that references dead asset hashes.
+	if strings.HasPrefix(requestedPath, "/_app/immutable/") {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	} else {
+		w.Header().Set("Cache-Control", "no-cache")
+	}
 	_, err = io.Copy(w, f)
 	return err
 }
