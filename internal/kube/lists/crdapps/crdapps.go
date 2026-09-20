@@ -41,7 +41,11 @@ func (il *List) Populate(namespaces ...string) *List {
 			Namespace(namespace).
 			List(context.Background(), metav1.ListOptions{})
 		if err != nil {
+			// The CRD may not be installed (e.g. upstream chart without
+			// crd.yaml); List returns a nil result on error, so skip the
+			// append to avoid a nil pointer dereference panic.
 			il.err = err
+			continue
 		}
 		il.items = append(il.items, apps.Items...)
 	}
