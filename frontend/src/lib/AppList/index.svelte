@@ -48,51 +48,34 @@
 </div>
 
 <style>
+    /* Fluid tile grid: column count is decided by available space, not by
+       media queries. `minmax(min(240px, 100%), 1fr)` lets tracks shrink
+       below the ideal minimum on narrow screens so long app names can
+       never force horizontal overflow. Phones get one column, tablets
+       2-3, desktops 4+. */
     .apps_loop {
         display: grid;
-        grid-column-gap: 0px;
-        grid-row-gap: 0px;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        grid-template-rows: 64px;
-        padding-bottom: var(--module-spacing);
-    }
-
-    .apps_loop.grouped {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(240px, 100%), 1fr)
+        );
         grid-template-rows: auto;
+        column-gap: 20px;
+        row-gap: 10px;
+        padding-bottom: var(--module-spacing);
     }
 
     .apps_group {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(220px, 100%), 1fr)
+        );
+        column-gap: 16px;
+        row-gap: 10px;
     }
 
     .links_item h4 {
         color: var(--color-text-acc);
-    }
-
-    @media screen and (max-width: 1260px) {
-        .apps_loop {
-            grid-template-columns: 1fr 1fr 1fr;
-            width: 90vw;
-        }
-
-        .apps_group {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
-    @media screen and (max-width: 667px) {
-        .apps_loop {
-            grid-column-gap: 0px;
-            grid-row-gap: 14px;
-            grid-template-columns: 1fr;
-            width: 100%;
-        }
-
-        .apps_group {
-            grid-template-columns: 1fr;
-            grid-row-gap: 10px;
-        }
     }
 </style>

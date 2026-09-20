@@ -50,7 +50,23 @@
 {/each}
 
 <style>
+    .apps_item {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        min-height: 64px;
+        margin: 0;
+        padding: 4px 10px 4px 0;
+        /* allow the tile to shrink inside a grid track and clip anything
+           that would otherwise blow out the track width */
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
     .apps_icon {
+        flex: none;
         height: 64px;
         margin-right: 1em;
         padding-top: 15px;
@@ -67,15 +83,6 @@
         padding: 2px;
     }
 
-    .apps_item {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        height: 64px;
-        margin: 0;
-        padding-right: 10px;
-    }
-
     .apps_text {
         display: flex;
         flex-direction: column;
@@ -89,6 +96,9 @@
         font-size: 1em;
         font-weight: 500;
         text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .apps_text span {
@@ -115,9 +125,9 @@
 
     @media screen and (max-width: 667px) {
         .apps_icon {
-            height: 64px;
+            height: 56px;
             margin-right: 0.8em;
-            padding-top: 14px;
+            padding-top: 12px;
         }
 
         .apps_icon :global(svg) {
@@ -126,13 +136,7 @@
         }
 
         .apps_item {
-            height: 68px;
-        }
-    }
-
-    @media only screen and (max-width: 400px) {
-        .app_address {
-            display: none;
+            min-height: 60px;
         }
     }
 </style>

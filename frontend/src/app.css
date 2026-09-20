@@ -38,7 +38,9 @@ body{
 	margin: 0;
 	padding: 0;
 	webkit-font-smoothing: antialiased;
-	width: 100vw;
+	max-width: 100%;
+	overflow-x: clip;
+	width: 100%;
 }
 
 *,
@@ -104,7 +106,7 @@ input{
 	border: 0;
 	border-bottom: thin solid var(--color-text-acc);
 	color: var(--color-text-pri);
-	font-size: 0.8em;
+	font-size: max(0.8em, 16px); /* never below 16px: iOS Safari zooms the viewport on focus otherwise */
 	height: 3.5em;
 	transition: all 0.4s ease;
 	width: 100%;
@@ -159,7 +161,7 @@ table a{
 
 @media screen and (max-width: 667px) {
 	html {
-		font-size: calc(16px + 6 * ((100vw - 320px) / 680));
+		font-size: clamp(15px, 16px + 6 * ((100vw - 320px) / 680), 18px);
 	}
 
 	h1 {

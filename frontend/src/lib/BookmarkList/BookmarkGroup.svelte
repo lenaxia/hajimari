@@ -28,6 +28,7 @@
     .links_item a {
         display: block;
         line-height: 2;
+        overflow-wrap: anywhere;
     }
 
     .links_item :global(svg) {

@@ -148,7 +148,6 @@
             bind:value={query}
             type="text"
             id="keywords"
-            size="50"
             spellcheck="false"
             autofocus={true}
         />

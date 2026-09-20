@@ -31,37 +31,26 @@
 {/if}
 
 <style>
+    /* Fluid bookmark grid — column count follows available space. */
     .links_loop {
         display: grid;
-        flex-wrap: nowrap;
-        grid-column-gap: 20px;
-        grid-row-gap: 0px;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(240px, 100%), 1fr)
+        );
         grid-template-rows: auto;
+        column-gap: 20px;
+        row-gap: 12px;
     }
 
     .links_item {
         line-height: 1.5rem;
         margin-bottom: 2em;
+        min-width: 0;
         webkit-font-smoothing: antialiased;
     }
 
     .links_item h4 {
         color: var(--color-text-acc);
-    }
-
-    @media screen and (max-width: 1260px) {
-        .links_loop {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-    }
-
-    @media screen and (max-width: 667px) {
-        .links_loop {
-            grid-column-gap: 20px;
-            grid-row-gap: 12px;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto;
-        }
     }
 </style>
