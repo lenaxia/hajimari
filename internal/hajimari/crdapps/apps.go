@@ -9,6 +9,7 @@ import (
 	"github.com/toboshii/hajimari/internal/kube/wrappers"
 	"github.com/toboshii/hajimari/internal/log"
 	"github.com/toboshii/hajimari/internal/models"
+	"github.com/toboshii/hajimari/internal/visibility"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 )
@@ -69,7 +70,7 @@ func appsToHajimariApps(apps []unstructured.Unstructured) (appGroups []models.Ap
 		appObj := v1alpha1.Application{}
 		err := mapstructure.Decode(app.UnstructuredContent(), &appObj)
 		if err != nil {
-			logger.Error("Could not unmarshall object: %s/", name, namespace)
+			logger.Errorf("Could not unmarshall object: %s/%s", name, namespace)
 		}
 
 		wrapper := wrappers.NewAppWrapper(&appObj)
@@ -92,11 +93,12 @@ func appsToHajimariApps(apps []unstructured.Unstructured) (appGroups []models.Ap
 
 		if i, ok := appMap[wrapper.GetGroup()]; ok {
 			appGroups[i].Apps = append(appGroups[i].Apps, models.App{
-				Name:        wrapper.GetName(),
-				Icon:        wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
-				URL:         wrapper.GetURL(),
-				TargetBlank: wrapper.GetTargetBlank(),
-				Info:        wrapper.GetInfo(),
+				Name:          wrapper.GetName(),
+				Icon:          wrapper.GetAnnotationValue(annotations.HajimariIconAnnotation),
+				URL:           wrapper.GetURL(),
+				TargetBlank:   wrapper.GetTargetBlank(),
+				Info:          wrapper.GetInfo(),
+				VisibleGroups: visibility.ParseGroupsList(wrapper.GetVisibleGroups()),
 			})
 		}
 

@@ -83,6 +83,59 @@ Hajimari looks for specific annotations on [Ingresses](https://kubernetes.io/doc
 | `hajimari.io/url`         | A URL for the Hajimari app (This will override the ingress URL). It MUST begin with a scheme i.e., `http://` or `https://`                           | `false`  |
 | `hajimari.io/targetBlank` | Determines if links should open in new tabs/windows                                                                                                  | `false`  |
 | `hajimari.io/info`        | A short description of the Hajimari app                                                                                                              | `false`  |
+| `hajimari.io/visible-groups` | A comma separated list of forward-auth user groups allowed to see this app. Absent means visible to everyone; `*` means any authenticated user | `false` |
+
+### Group-based visibility
+
+Hajimari can filter apps and bookmarks per requesting user based on group
+membership, delegating authentication entirely to a forward-auth proxy:
+
+1. Run Hajimari behind a reverse proxy with a forward-auth middleware (e.g.
+   Traefik + Authelia) configured to inject the user's group memberships as a
+   comma separated header (`Remote-Groups` by default, see the `groupsHeader`
+   config option).
+2. Annotate ingresses with `hajimari.io/visible-groups`, or set
+   `visibleGroups` on custom apps, CRD apps and bookmark groups:
+
+```yaml
+metadata:
+  annotations:
+    hajimari.io/enable: "true"
+    hajimari.io/visible-groups: "family,friends"
+```
+
+```yaml
+globalBookmarks:
+  - group: Admin Links
+    visibleGroups: [admins]
+    bookmarks:
+      - name: Proxmox
+        url: https://proxmox.example.com
+```
+
+Semantics:
+
+- No visibility metadata means visible to everyone (stock behavior).
+- `visible-groups: "*"` means visible to any authenticated request.
+- Group matching is case-insensitive and whitespace tolerant.
+- A request whose header carries no matching group does not see the tile. This
+  includes requests with no header at all (direct pod access or a broken proxy
+  chain), so restricted tiles always fail closed.
+
+Hajimari trusts the configured header unconditionally: ensure the service is
+only reachable through the forward-auth chain (ingress/network policy), since
+anything that can set the header can impersonate group membership.
+
+Members of a group listed in `adminGroups` (default `admins`) can preview
+what another audience sees by appending a `group` query parameter, e.g.
+`https://home.example.com/?group=family`. The value may be a comma separated
+list (union preview) or empty (`?group=`) to preview the groupless view. The
+parameter is only honored for admins — determined solely from the trusted
+header — and everyone else receives a 403.
+
+See [docs/group-visibility.md](docs/group-visibility.md) for the full
+specification, invariants and test plan.
+
 
 ### Config
 

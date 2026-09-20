@@ -19,4 +19,6 @@ const (
 	HajimariStatusCheckEnabledAnnotation = "hajimari.io/statusCheckEnabled"
 	// HajimariTargetBlankAnnotation boolean used for making links open in a new window.
 	HajimariTargetBlankAnnotation = "hajimari.io/targetBlank"
+	// HajimariVisibleGroupsAnnotation comma separated list of forward-auth user groups allowed to see the app
+	HajimariVisibleGroupsAnnotation = "hajimari.io/visible-groups"
 )

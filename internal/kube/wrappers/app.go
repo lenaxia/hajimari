@@ -54,3 +54,8 @@ func (aw *AppWrapper) GetTargetBlank() bool {
 func (aw *AppWrapper) GetURL() string {
 	return aw.app.Spec.URL
 }
+
+// GetVisibleGroups func extracts the forward-auth groups allowed to see the app
+func (aw *AppWrapper) GetVisibleGroups() []string {
+	return aw.app.Spec.VisibleGroups
+}

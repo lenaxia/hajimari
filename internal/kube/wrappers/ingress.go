@@ -6,6 +6,7 @@ import (
 
 	"github.com/toboshii/hajimari/internal/annotations"
 	utilStrings "github.com/toboshii/hajimari/internal/util/strings"
+	"github.com/toboshii/hajimari/internal/visibility"
 	v1 "k8s.io/api/networking/v1"
 )
 
@@ -74,6 +75,11 @@ func (iw *IngressWrapper) GetTargetBlank() bool {
 		return utilStrings.ParseBool(targetBlankFromAnnotation)
 	}
 	return false
+}
+
+// GetVisibleGroups func extracts the forward-auth groups allowed to see the app
+func (iw *IngressWrapper) GetVisibleGroups() []string {
+	return visibility.ParseGroups(iw.GetAnnotationValue(annotations.HajimariVisibleGroupsAnnotation))
 }
 
 // GetURL func extracts url of the ingress wrapped by the object

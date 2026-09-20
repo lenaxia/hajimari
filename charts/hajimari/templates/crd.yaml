@@ -48,5 +48,9 @@ spec:
                   type: string
                 targetBlank:
                   type: boolean
+                visibleGroups:
+                  type: array
+                  items:
+                    type: string
             status:
               type: object

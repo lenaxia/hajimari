@@ -85,13 +85,14 @@
     @media screen and (max-width: 667px) {
         .apps_loop {
             grid-column-gap: 0px;
-            grid-row-gap: 0px;
-            grid-template-columns: 1fr 1fr;
-            width: 90vw;
+            grid-row-gap: 14px;
+            grid-template-columns: 1fr;
+            width: 100%;
         }
 
         .apps_group {
             grid-template-columns: 1fr;
+            grid-row-gap: 10px;
         }
     }
 </style>

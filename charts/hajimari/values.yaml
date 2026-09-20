@@ -7,11 +7,11 @@
 
 image:
   # -- image repository
-  repository: ghcr.io/toboshii/hajimari
+  repository: ghcr.io/lenaxia/hajimari
   # -- image pull policy
   pullPolicy: IfNotPresent
   # -- image tag
-  tag: v0.3.1
+  tag: v0.3.1-gv.4
 
 # -- environment variables.
 # @default -- See below
@@ -28,6 +28,15 @@ hajimari:
 
   # -- Set to true to show all discovered applications by default.
   defaultEnable: false
+
+  # -- HTTP header carrying the authenticated user's group memberships
+  # (comma separated), injected by a forward-auth proxy (e.g. Authelia).
+  groupsHeader: Remote-Groups
+
+  # -- Groups whose members may use ?group=<groups> to preview the dashboard
+  # as another membership would see it.
+  adminGroups:
+    - admins
 
   # -- Namespace selector to use for discovering applications
   namespaceSelector:
@@ -48,6 +57,7 @@ hajimari:
   #       url: 'https://example.com'
   #       icon: 'mdi:test-tube'
   #       info: This is a test app
+  #       visibleGroups: [family, friends]
 
   # -- Create sample Custom Resource Application
   createCRAppSample: false
@@ -62,6 +72,11 @@ hajimari:
   #     url: 'http://gmail.com'
   #   - name: Slack
   #     url: 'https://slack.com/signin'
+  # - group: Admin Links
+  #   visibleGroups: [admins]
+  #   bookmarks:
+  #   - name: Proxmox
+  #     url: 'https://proxmox.example.com'
 
 
 # -- Configures service settings for the chart.

@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/toboshii/hajimari/internal/config"
 	"github.com/toboshii/hajimari/internal/models"
+	"github.com/toboshii/hajimari/internal/visibility"
 )
 
 type bookmarkResource struct{}
@@ -31,6 +32,13 @@ func (rs *bookmarkResource) ListBookmarks(w http.ResponseWriter, r *http.Request
 	}
 
 	globalBookmarks := appConfig.GlobalBookmarks
+
+	user, status, ok := resolveVisibilityUser(appConfig, r)
+	if !ok {
+		http.Error(w, "group impersonation requires admin group membership", status)
+		return
+	}
+	globalBookmarks = visibility.FilterBookmarkGroups(user, globalBookmarks)
 
 	if err := render.RenderList(w, r, NewBookmarkListResponse(globalBookmarks)); err != nil {
 		render.Render(w, r, ErrServerError(err))
