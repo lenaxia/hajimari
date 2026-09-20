@@ -58,10 +58,8 @@
 
     @media screen and (max-width: 667px) {
         .links_loop {
-            display: grid;
-            flex-wrap: nowrap;
             grid-column-gap: 20px;
-            grid-row-gap: 0px;
+            grid-row-gap: 12px;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto;
         }

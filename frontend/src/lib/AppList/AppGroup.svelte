@@ -81,6 +81,7 @@
         flex-direction: column;
         justify-content: center;
         flex: 1;
+        min-width: 0;
         overflow: hidden;
     }
 
@@ -97,9 +98,9 @@
     }
 
     .app_address {
-        white-space:nowrap;
+        white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis ellipsis;
+        text-overflow: ellipsis;
     }
 
     .app_info {
@@ -122,6 +123,10 @@
         .apps_icon :global(svg) {
             font-size: 2em;
             line-height: 2.5rem;
+        }
+
+        .apps_item {
+            height: 68px;
         }
     }
 
