@@ -1,6 +1,7 @@
 package crdapps
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/toboshii/hajimari/internal/config"
@@ -9,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/scheme"
+	k8stesting "k8s.io/client-go/testing"
 )
 
 var listKinds = map[schema.GroupVersionResource]string{
@@ -109,5 +111,31 @@ func TestPopulateEmpty(t *testing.T) {
 	}
 	if len(items) != 0 {
 		t.Fatalf("expected no items, got %+v", items)
+	}
+}
+
+func TestPopulateListErrorDoesNotPanic(t *testing.T) {
+	app := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "hajimari.io/v1alpha1",
+			"kind":       "Application",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+			},
+			"spec": map[string]interface{}{
+				"name": "Test", "group": "Misc", "url": "https://test.thekao.cloud",
+			},
+		},
+	}
+	client := newFakeClient(app)
+	client.PrependReactor("list", "applications", func(action k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, errors.New("the server could not find the requested resource")
+	})
+
+	list := NewList(client, config.Config{})
+	_, err := list.Populate("").Get()
+	if err == nil {
+		t.Fatal("expected the list error to be surfaced")
 	}
 }
