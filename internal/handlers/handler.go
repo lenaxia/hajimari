@@ -21,7 +21,13 @@ var (
 // contentSecurityPolicy allows the same-origin SPA, inline styles (Svelte
 // component CSS), external app icons (https images), and the runtime iconify
 // API used to resolve mdi/simple-icons names.
-const contentSecurityPolicy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' data:; connect-src 'self' https://api.iconify.design; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+//
+// script-src needs 'unsafe-inline': this SvelteKit version ships two inline
+// scripts — the theme pre-boot in app.html and the module hydration script,
+// whose body embeds per-build asset hashes, so hash-pinning them breaks on
+// every frontend rebuild. All other hardening (default-src 'self',
+// object-src 'none', frame-ancestors, nosniff) is preserved.
+const contentSecurityPolicy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' data:; connect-src 'self' https://api.iconify.design; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
 
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
