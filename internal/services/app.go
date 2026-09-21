@@ -43,6 +43,8 @@ func NewAppService(logger *logrus.Logger) *appService {
 }
 
 func (as *appService) GetCachedKubeApps() []models.AppGroup {
+	mutex.RLock() // lock the cache before reading from it
+	defer mutex.RUnlock()
 	return kubeAppCache
 }
 

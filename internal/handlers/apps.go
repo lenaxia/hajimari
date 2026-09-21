@@ -51,6 +51,7 @@ func (rs *appResource) ListApps(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("An error occured while populating custom hajimari apps: ", err)
 		render.Render(w, r, ErrServerError(err))
+		return
 	}
 
 	// Merge apps together
