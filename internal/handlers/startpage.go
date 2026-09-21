@@ -102,6 +102,18 @@ func (sr *startpageResource) GetDefaultStartpage(w http.ResponseWriter, r *http.
 }
 
 func (sr *startpageResource) CreateStartpage(w http.ResponseWriter, r *http.Request) {
+	appConfig, err := config.GetConfig()
+	if err != nil {
+		logger.Error("Failed to read configuration for hajimari: ", err)
+		render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	if !requireAdmin(appConfig, r) {
+		http.Error(w, "startpage mutations require admin group membership", http.StatusForbidden)
+		return
+	}
+
 	data := &StartpageRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -121,6 +133,18 @@ func (sr *startpageResource) CreateStartpage(w http.ResponseWriter, r *http.Requ
 }
 
 func (sr *startpageResource) UpdateStartpage(w http.ResponseWriter, r *http.Request) {
+	appConfig, err := config.GetConfig()
+	if err != nil {
+		logger.Error("Failed to read configuration for hajimari: ", err)
+		render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	if !requireAdmin(appConfig, r) {
+		http.Error(w, "startpage mutations require admin group membership", http.StatusForbidden)
+		return
+	}
+
 	startpage := r.Context().Value(contextKeyStartpage).(*models.Startpage)
 
 	data := &StartpageRequest{Startpage: startpage}
@@ -141,7 +165,17 @@ func (sr *startpageResource) UpdateStartpage(w http.ResponseWriter, r *http.Requ
 }
 
 func (sr *startpageResource) DeleteStartpage(w http.ResponseWriter, r *http.Request) {
-	var err error
+	appConfig, err := config.GetConfig()
+	if err != nil {
+		logger.Error("Failed to read configuration for hajimari: ", err)
+		render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	if !requireAdmin(appConfig, r) {
+		http.Error(w, "startpage mutations require admin group membership", http.StatusForbidden)
+		return
+	}
 
 	startpage := r.Context().Value(contextKeyStartpage).(*models.Startpage)
 

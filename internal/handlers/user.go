@@ -30,3 +30,9 @@ func resolveVisibilityUser(appConfig *config.Config, r *http.Request) (*visibili
 	}
 	return visibility.NewUser(groups), 0, true
 }
+
+// requireAdmin reports whether the requesting user is a member of one of the
+// configured admin groups, as read from the trusted forward-auth header.
+func requireAdmin(appConfig *config.Config, r *http.Request) bool {
+	return visibility.NewUserFromRequest(appConfig.GroupsHeader, r).MemberOfAny(appConfig.AdminGroups)
+}
