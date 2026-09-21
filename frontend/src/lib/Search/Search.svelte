@@ -158,15 +158,26 @@
     #search :global(svg) {
         font-size: 1.5em;
         position: absolute;
-        margin-top: 0.6em;
+        /* deterministic placement: anchored inside the form box instead of
+           riding its static position, which could push past the input edge */
+        left: 0.6em;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     #search {
+        position: relative;
         margin-bottom: 3vh;
     }
 
+    #search form {
+        position: relative;
+    }
+
     input {
-        font-size: 1em;
+        font-size: max(0.8em, 16px);
         text-indent: 3em;
+        min-width: 0;
+        max-width: 100%;
     }
 </style>

@@ -162,12 +162,19 @@ table a{
 @media screen and (max-width: 667px) {
 	html {
 		font-size: clamp(15px, 16px + 6 * ((100vw - 320px) / 680), 18px);
+		/* belt-and-braces alongside body's overflow-x: clip — Safari has
+		   long-standing quirks panning to overflow content with clip alone */
+		overflow-x: hidden;
 	}
 
 	h1 {
-		font-size: 4em;
+		/* 4em (~67px) rendered right at the content-width edge on phones;
+		   any font-metric variance (SF Pro on iOS) tipped it over into
+		   horizontal overflow. Fluid size stays well inside the box. */
+		font-size: clamp(1.75rem, 9vw, 3rem);
 		height: auto;
 		margin-bottom: 0em;
+		overflow-wrap: break-word;
 	}
 
 	h2 {
