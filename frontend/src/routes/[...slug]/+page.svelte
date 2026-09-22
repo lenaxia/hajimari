@@ -9,6 +9,7 @@
 	import { apps, filteredApps, themes } from "$lib/stores";
 	import type { PageData } from "./$types";
 	import { onMount } from "svelte";
+	import { page } from "$app/stores";
 
 	export let data: PageData;
 	$apps = data.apps;
@@ -16,6 +17,11 @@
 	let showModal = false;
 
 	$: darkMode = true;
+
+	// Group impersonation (?group=) replaces the session's group filter for
+	// the whole dashboard. It must never be silent: show a persistent,
+	// clickable banner with an exit while it is active.
+	$: previewGroup = $page.url.searchParams.get("group");
 
 	if (data.startpage.customThemes) {
 		$themes.push(...(data.startpage.customThemes as Array<any>));
@@ -66,6 +72,16 @@
 <svelte:head>
 	<title>{data.startpage.title}</title>
 </svelte:head>
+
+{#if previewGroup !== null}
+	<div id="group_preview">
+		<Icon icon="mdi:eye-outline" />
+		<span>
+			Previewing as group: <strong>{previewGroup || "(everyone)"}</strong>
+		</span>
+		<a href={$page.url.pathname}>Exit preview</a>
+	</div>
+{/if}
 
 {#if showModal}
 	<Modal settings={data.startpage} on:close={() => (showModal = false)} />
@@ -118,6 +134,35 @@
 </div>
 
 <style>
+	#group_preview {
+		align-items: center;
+		background-color: var(--color-text-acc);
+		border-radius: 6px;
+		color: var(--color-background);
+		column-gap: 0.5em;
+		display: flex;
+		font-size: 0.85em;
+		font-weight: 500;
+		padding: 0.5em 0.9em;
+		position: fixed;
+		top: 12px;
+		right: 12px;
+		z-index: 50;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+		max-width: calc(100vw - 24px);
+	}
+
+	#group_preview a {
+		color: var(--color-background);
+		font-weight: 700;
+		text-decoration: underline;
+		white-space: nowrap;
+	}
+
+	#group_preview strong {
+		font-weight: 700;
+	}
+
 	#modal_init a {
 		z-index: 25;
 		bottom: 1vh;
