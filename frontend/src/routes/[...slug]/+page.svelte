@@ -18,10 +18,10 @@
 
 	$: darkMode = true;
 
-	// Group impersonation (?group=) replaces the session's group filter for
-	// the whole dashboard. It must never be silent: show a persistent,
-	// clickable banner with an exit while it is active.
-	$: previewGroup = $page.url.searchParams.get("group");
+	// Group impersonation (?group=, aliased as ?g=) replaces the session's
+	// group filter for the whole dashboard. It must never be silent: show a
+	// persistent, clickable banner with an exit while it is active.
+	$: previewGroup = $page.url.searchParams.get("group") ?? $page.url.searchParams.get("g");
 
 	if (data.startpage.customThemes) {
 		$themes.push(...(data.startpage.customThemes as Array<any>));

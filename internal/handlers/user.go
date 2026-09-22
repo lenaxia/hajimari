@@ -10,12 +10,15 @@ import (
 
 // resolveVisibilityUser returns the effective user for the request. Normally
 // this is the user resolved from the trusted forward-auth header. When a
-// `group` query parameter is present, admins (members of a configured admin
-// group) impersonate the requested group membership instead.
+// `group` (or its `g` alias) query parameter is present, admins (members of
+// a configured admin group) impersonate the requested group memberships
+// instead. Both params accept a comma separated list so mixed-permission
+// views can be previewed; values are trimmed and duplicates collapse.
 func resolveVisibilityUser(appConfig *config.Config, r *http.Request) (*visibility.User, int, bool) {
 	requester := visibility.NewUserFromRequest(appConfig.GroupsHeader, r)
 
-	requested := r.URL.Query()["group"]
+	query := r.URL.Query()
+	requested := append(query["group"], query["g"]...)
 	if len(requested) == 0 {
 		return requester, 0, true
 	}
@@ -24,9 +27,17 @@ func resolveVisibilityUser(appConfig *config.Config, r *http.Request) (*visibili
 		return nil, http.StatusForbidden, false
 	}
 
+	seen := make(map[string]bool)
 	var groups []string
 	for _, g := range requested {
-		groups = append(groups, strings.Split(g, ",")...)
+		for _, part := range strings.Split(g, ",") {
+			part = strings.TrimSpace(part)
+			if part == "" || seen[part] {
+				continue
+			}
+			seen[part] = true
+			groups = append(groups, part)
+		}
 	}
 	return visibility.NewUser(groups), 0, true
 }

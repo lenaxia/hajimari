@@ -219,6 +219,30 @@ func TestListAppsAdminImpersonation(t *testing.T) {
 			want:    map[string][]string{"media": {"jellyfin", "immich"}, "infra": {"proxmox"}},
 		},
 		{
+			name:    "g alias impersonates family",
+			headers: adminHeader,
+			query:   "g=family",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}},
+		},
+		{
+			name:    "g alias comma separated union",
+			headers: adminHeader,
+			query:   "g=family,admins",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}, "infra": {"proxmox"}},
+		},
+		{
+			name:    "comma separated with whitespace",
+			headers: adminHeader,
+			query:   "group=family, admins",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}, "infra": {"proxmox"}},
+		},
+		{
+			name:    "group and g params merge with duplicates collapsed",
+			headers: adminHeader,
+			query:   "group=family&g=admins,family",
+			want:    map[string][]string{"media": {"jellyfin", "immich"}, "infra": {"proxmox"}},
+		},
+		{
 			name:    "admin without param keeps own view",
 			headers: adminHeader,
 			query:   "",

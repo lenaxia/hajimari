@@ -30,7 +30,7 @@ type Startpage = {
 export const load: PageLoad = async ({ fetch, params, url }) => {
     const { slug } = params;
 
-    const groupParam = url.searchParams.get('group');
+    const groupParam = url.searchParams.get('group') ?? url.searchParams.get('g');
     const groupSuffix = groupParam !== null ? `?group=${encodeURIComponent(groupParam)}` : '';
 
     const [startpage, apps, bookmarks] = await Promise.all([
