@@ -56,8 +56,13 @@
     export let defaultProvider = "Google";
 
     let query = "";
+    // Case-insensitive: config files routinely disagree on capitalization
+    // (e.g. defaultSearchProvider: "Kagi" vs provider name "kagi") and an
+    // exact-match miss renders an empty icon with no other symptom.
     let defaultProviderRecord = providers.find(
-        (provider) => provider.name === defaultProvider
+        (provider) =>
+            provider.name.toLowerCase() ===
+            (defaultProvider ?? "").toLowerCase()
     );
     let icon = defaultProviderRecord?.icon;
 
