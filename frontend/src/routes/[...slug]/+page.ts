@@ -44,10 +44,20 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
         throw error(startpage.status, data.status);
     }
 
+    // Group impersonation requires admin membership server-side. For
+    // anyone else a ?group= link would 403 both fetches and the JSON
+    // parsing below would crash the page into a 500 — degrade to the
+    // requester's own view instead.
+    const asJson = async (resp: Response, fallbackFetch: () => Promise<Response>) => {
+        if (resp.ok) return resp.json();
+        if (groupSuffix) return (await fallbackFetch()).json();
+        return [];
+    };
+
     return {
         startpage: (await startpage.json() as Startpage),
-        apps: (await apps.json()),
-        globalBookmarks: (await bookmarks.json()),
+        apps: (await asJson(apps, () => api(fetch, 'GET', 'apps'))),
+        globalBookmarks: (await asJson(bookmarks, () => api(fetch, 'GET', 'bookmarks'))),
         slug
     }
 
